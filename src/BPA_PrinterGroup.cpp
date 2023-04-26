@@ -1,8 +1,31 @@
+/*
+ * BPA_PrinterGroup:
+ *    Encapsulates the notion of a group of printers (PrintClients) and helps
+ *    to manage them more easily. Also provides a DataSupplier that is compatible
+ *    with the [WebThing framework](https://github.com/jpasqua/WebThing),
+ *    but can also be used independently.
+ * 
+ */
+
+//--------------- Begin:  Includes ---------------------------------------------
+//                                  Core Libraries
+#include <Wire.h>
+#if defined(ESP8266)
+  #include <ESP8266WiFi.h>
+#elif defined(ESP32)
+  #include <WiFi.h>
+#else
+  #error "Must be an ESP8266 or ESP32"
+#endif
+//                                  Third Party Libraries
 #include <Output.h>
-#include <BPA_OctoClient.h>
-#include <BPA_MockPrintClient.h>
-#include <BPA_DuetClient.h>
+//                                  Local Includes
+#include "BPA_OctoClient.h"
+#include "BPA_MockPrintClient.h"
+#include "BPA_DuetClient.h"
 #include "BPA_PrinterGroup.h"
+//--------------- End:    Includes ---------------------------------------------
+
 
 PrinterGroup::PrinterGroup(
       uint8_t nPrintersInGroup, PrinterSettings* ps,
@@ -15,13 +38,12 @@ PrinterGroup::PrinterGroup(
 
   _lastUpdateTime = new uint32_t[_nPrintersInGroup];
   _printer = new PrintClient*[_nPrintersInGroup];
+  _printerIPs = new String[nPrintersInGroup];
   for (int i = 0; i < _nPrintersInGroup; i++) {
     _lastUpdateTime[i] = 0;
     _printer[i] = nullptr;
     Basics::resetString(_printerIPs[i]);
   }
-
-  _printerIPs = new String[nPrintersInGroup];
 }
 
 void PrinterGroup::refreshPrinterData(bool force) {
@@ -104,11 +126,11 @@ String PrinterGroup::getDisplayName(uint8_t whichPrinter) {
   return displayName;
 }
 
-void PrinterGroup::nextCompletion(String &printer, String &formattedTime, uint32_t &delta) {
+bool PrinterGroup::nextCompletion(uint8_t& whichPrinter, String &formattedTime, uint32_t &delta) {
   uint32_t minCompletion = UINT32_MAX;
   int printerWithNextCompletion;
   for (int i = 0; i < _nPrintersInGroup; i++) {
-    if (_ps[i].isActive) continue;
+    if (!_ps[i].isActive) continue;
     if (_printer[i]->getState() == PrintClient::State::Printing) {
       uint32_t thisCompletion = _printer[i]->getPrintTimeLeft();
       if (thisCompletion < minCompletion) {
@@ -120,9 +142,19 @@ void PrinterGroup::nextCompletion(String &printer, String &formattedTime, uint32
 
   if (minCompletion != UINT32_MAX) {
     PrinterSettings *ps = &_ps[printerWithNextCompletion];
-    printer =  (ps->nickname.isEmpty()) ? ps->server : ps->nickname;
+    whichPrinter = printerWithNextCompletion;
     delta = minCompletion;
     completionTime(formattedTime, delta);
+    return true;
+  }
+  return false;
+}
+
+void PrinterGroup::nextCompletion(String &printer, String &formattedTime, uint32_t &delta) {
+  uint8_t whichPrinter;
+  if (nextCompletion(whichPrinter, formattedTime, delta)) {
+    PrinterSettings *ps = &_ps[whichPrinter];
+    printer =  (ps->nickname.isEmpty()) ? ps->server : ps->nickname;
   } else {
     printer = "";
     formattedTime = "";
