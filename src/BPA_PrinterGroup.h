@@ -22,8 +22,11 @@ public:
   PrinterSettings* getSettings(uint8_t whichPrinter);
 
   void nextCompletion(String &printer, String &formattedTime, uint32_t &delta);
+  bool nextCompletion(uint8_t& whichPrinter, String &formattedTime, uint32_t &delta);
   void dataSupplier(const String& key, String& value);
-
+  uint8_t numberOfPrinters() { return _nPrintersInGroup; }
+  void completionTime(String &formattedTime, uint32_t timeLeft);
+  
 private:
   uint8_t _nPrintersInGroup;
   PrinterSettings* _ps;       // Size == _nPrintersInGroup
@@ -37,7 +40,6 @@ private:
 
   void cachePrinterIP(int i);
   void mapPrinterSpecific(const String& key, String& value, int printerIndex);
-  void completionTime(String &formattedTime, uint32_t timeLeft);
 
 };
 
