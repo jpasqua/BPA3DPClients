@@ -141,7 +141,6 @@ bool PrinterGroup::nextCompletion(uint8_t& whichPrinter, String &formattedTime, 
   }
 
   if (minCompletion != UINT32_MAX) {
-    PrinterSettings *ps = &_ps[printerWithNextCompletion];
     whichPrinter = printerWithNextCompletion;
     delta = minCompletion;
     completionTime(formattedTime, delta);
