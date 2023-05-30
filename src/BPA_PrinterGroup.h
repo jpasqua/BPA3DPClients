@@ -26,7 +26,8 @@ public:
   void dataSupplier(const String& key, String& value);
   uint8_t numberOfPrinters() { return _nPrintersInGroup; }
   void completionTime(String &formattedTime, uint32_t timeLeft);
-  
+  void printerInfo(String& printerInfoAsJSON);
+
 private:
   uint8_t _nPrintersInGroup;
   PrinterSettings* _ps;       // Size == _nPrintersInGroup

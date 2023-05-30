@@ -181,6 +181,36 @@ void PrinterGroup::dataSupplier(const String& key, String& value) {
   }
 }
 
+void PrinterGroup::printerInfo(String& printerInfoAsJSON) {
+    bool firstTime = true;
+    printerInfoAsJSON = "[";
+    for (int i = numberOfPrinters()-1; i >= 0; i--) {
+      if (_ps[i].isActive) {
+        if (!firstTime) printerInfoAsJSON += ", ";
+        PrintClient* p = _printer[i];
+        printerInfoAsJSON += "{\"name\":\"" + getDisplayName(i) + "\"";
+        printerInfoAsJSON += ", \"url\":\"http://" + _ps[i].server + ':' + _ps[i].port + "\"";
+        if (p->getState() >= PrintClient::State::Complete) {
+
+          String completeAt;
+          uint32_t timeLeftInSeconds = p->getPrintTimeLeft();
+          if (timeLeftInSeconds) completionTime(completeAt, timeLeftInSeconds);
+
+          printerInfoAsJSON += ", \"pct\": ";
+          printerInfoAsJSON += (int)(p->getPctComplete());
+          printerInfoAsJSON += ", \"remaining\":";
+          printerInfoAsJSON += timeLeftInSeconds/60;
+          printerInfoAsJSON += ", \"completeAt\": \"";
+          printerInfoAsJSON += completeAt + "\"";
+          printerInfoAsJSON += ", \"file\": \"";
+          printerInfoAsJSON += p->getFilename() + "\"}";
+          firstTime = false;
+        }
+      }
+    }
+    printerInfoAsJSON += "]";
+}
+
 
 //
 // ----- Private Functions
