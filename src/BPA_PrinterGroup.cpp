@@ -191,7 +191,6 @@ void PrinterGroup::printerInfo(String& printerInfoAsJSON) {
         printerInfoAsJSON += "{\"name\":\"" + getDisplayName(i) + "\"";
         printerInfoAsJSON += ", \"url\":\"http://" + _ps[i].server + ':' + _ps[i].port + "\"";
         if (p->getState() >= PrintClient::State::Complete) {
-
           String completeAt;
           uint32_t timeLeftInSeconds = p->getPrintTimeLeft();
           if (timeLeftInSeconds) completionTime(completeAt, timeLeftInSeconds);
@@ -203,9 +202,11 @@ void PrinterGroup::printerInfo(String& printerInfoAsJSON) {
           printerInfoAsJSON += ", \"completeAt\": \"";
           printerInfoAsJSON += completeAt + "\"";
           printerInfoAsJSON += ", \"file\": \"";
-          printerInfoAsJSON += p->getFilename() + "\"}";
-          firstTime = false;
+          printerInfoAsJSON += p->getFilename();
+          printerInfoAsJSON += "\"";
         }
+        printerInfoAsJSON += "}";
+        firstTime = false;
       }
     }
     printerInfoAsJSON += "]";
