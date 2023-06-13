@@ -184,9 +184,9 @@ void PrinterGroup::dataSupplier(const String& key, String& value) {
 void PrinterGroup::printerInfo(String& printerInfoAsJSON) {
     bool firstTime = true;
     printerInfoAsJSON = "[";
-    for (int i = numberOfPrinters()-1; i >= 0; i--) {
+    for (int i = 0; i < _nPrintersInGroup; i++) {
+      if (!firstTime) printerInfoAsJSON += ", ";
       if (_ps[i].isActive) {
-        if (!firstTime) printerInfoAsJSON += ", ";
         PrintClient* p = _printer[i];
         printerInfoAsJSON += "{\"name\":\"" + getDisplayName(i) + "\"";
         printerInfoAsJSON += ", \"url\":\"http://" + _ps[i].server + ':' + _ps[i].port + "\"";
@@ -205,9 +205,9 @@ void PrinterGroup::printerInfo(String& printerInfoAsJSON) {
           printerInfoAsJSON += p->getFilename();
           printerInfoAsJSON += "\"";
         }
-        printerInfoAsJSON += "}";
-        firstTime = false;
-      }
+      } else { printerInfoAsJSON += "{"; }
+      printerInfoAsJSON += "}";
+      firstTime = false;
     }
     printerInfoAsJSON += "]";
 }
