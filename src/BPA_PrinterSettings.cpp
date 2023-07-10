@@ -47,12 +47,8 @@ void PrinterSettings::toJSON(JsonObject settings) const {
 }
 
 void PrinterSettings::logSettings() {
-  Log.verbose(F("  ----- %s: %s"), nickname.c_str(), type.c_str());
-  Log.verbose(F("  isActive: %T"), isActive);
-  Log.verbose(F("  server: %s"), server.c_str());
-  Log.verbose(F("  port: %d"), port);
+  Log.verbose(F("  ----- %s: %s, active: %T, mocked: %T"), nickname.c_str(), type.c_str(), isActive, mock);
+  Log.verbose(F("  server: %s:%d"), server.c_str(), port);
+  Log.verbose(F("  user/pass: %s/%s"), user.c_str(), pass.c_str());
   Log.verbose(F("  apiKey: %s"), apiKey.c_str());
-  Log.verbose(F("  user: %s"), user.c_str());
-  Log.verbose(F("  pass: %s"), pass.c_str());
-  Log.verbose(F("  mock: %T"), mock);
 }
